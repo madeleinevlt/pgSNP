@@ -5,9 +5,6 @@
 #  tous les dossiers de résultats sont dans un même dossier, spécifié en input
 ## 
 
-## A FAIRE
-# regarder les N et remplacer par R Y W S (https://github.com/Cibiv/IQ-TREE/wiki/Frequently-Asked-Questions) a faire en dernier parce que ça va être chiant à faire
-
 import argparse
 import glob
 from Bio import Align
@@ -373,11 +370,13 @@ if __name__ == "__main__":
         all_genome[genome_file.split("/")[-2].split(args.nom_a_suppr)[0]]=read_genome(genome_file)
     
     print(args.only_snp)
+    ##INDELs gestion -> DO NOT USE
     if not args.only_snp : 
         list_INDEL, list_en_DOUBLE=treat_INDEL(all_VCF_files)
         list_INDEL_sorted=sort_list_INDEL(list_INDEL)
         constru_seq_with_INDEL(list_INDEL_sorted, all_genome, list_en_DOUBLE, args.o)
     else :
+        ##SNP gestion
         constru_seq_only_SNP(all_genome, args.o)
 
     
