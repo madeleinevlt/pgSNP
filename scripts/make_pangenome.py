@@ -24,10 +24,8 @@ def get_argv() :
     parser = argparse.ArgumentParser(description='Build a reference from contigs files')
     parser.add_argument("file_in", metavar='input', type=str, help='folder which contains your contigs or file which contains all path for contig location')
     parser.add_argument("-nb_contigs", default=300, type=int, help='minimum of contigs in files, default=300')
-    parser.add_argument("-hit_min", default=300, type=int, help='minimum sequence length for a non hit contig, default=300')
-    parser.add_argument("-frag_min", default=100, type=int, help='minimum sequence length for a non hsp contig, default=100')
-    parser.add_argument("-frag_max", default=10, type=int, help='maximum length to be considered as fragment. If >, it is considered as a contig')
-    parser.add_argument("-identity", default=80, type=float, help='identity, default=80')
+    parser.add_argument("-hit_min", default=500, type=int, help='minimum sequence length for a non hit contig, default=300')
+    parser.add_argument("-identity", default=95, type=float, help='identity, default=80')
     parser.add_argument("output_folder", metavar='output', type=str, help='folder which contains all outputs. Must be created')
     parser.add_argument("-name_ref", type=str, default="ref.fasta", help='name of the final reference')
     parser.add_argument("-name_log", type=str, default="result", help="name of log output")
@@ -105,15 +103,14 @@ def gestion_fragment(ref_in,potentiel_inser) :
         #seq_res=to_change[:where_add-1]+to_add+to_change[where_add:]
         #dict_ref[who_add].seq=Seq.Seq(seq_res)
     #SeqIO.write(dict_ref.values(), ref_in, 'fasta-2line') 
-def make_reference(output_tmp, nb_contigs, len_hit_mini, len_frag_mini, len_frag_max, IDENTITY, output_folder, ref_name, name_log):         
+def make_reference(output_tmp, nb_contigs, len_hit_mini, IDENTITY, output_folder, ref_name, name_log):         
 
     keys=[]
     contribution_contigs=[] #contribution pour chaque fichier en nombre de contigs dans la référence
     contribution_nb_bp=[] # contribution pour chaque fichier en nombre de bp dans la référence
     nb_contig_all=0
     ref_in = output_folder + "/" + ref_name
-    if len_frag_mini==0 :
-        len_frag_mini=1
+
 
     #creation reference
     with open(output_tmp,"r") as fillin :
@@ -167,7 +164,7 @@ def make_reference(output_tmp, nb_contigs, len_hit_mini, len_frag_mini, len_frag
             if list_debut : 
                 potentiel={}    # liste qui contient les contigs qui peuvent potentiellement etre unique et donc à ajouter à la reference
                 potentiel_inser={} # liste qui contient les insertions qui peuvent potentiellement etre unique et donc à ajouter à la reference
-                if list_debut[0] > len_frag_mini : #regarder au début si on peut prendre des fragments entre [:premierdebut]
+                if list_debut[0] > 1 : #regarder au début si on peut prendre des fragments entre [:premierdebut]
                     potentiel[0] = [list_debut[0],0, dico_bornes[list_debut[0]][2]]
                             
                 while len(list_debut)!=0 :
@@ -179,12 +176,10 @@ def make_reference(output_tmp, nb_contigs, len_hit_mini, len_frag_mini, len_frag
                                 dico_bornes[debut1][0] = dico_bornes[debut2][0]
                             del list_debut[1]   # on delete seq 2 (car on a toutes les infos necessaires dans seq 1)
                         else : #sinon : (donc si on a un espace entre seq 1 et seq 2)
-                            if debut2 - dico_bornes[debut1][0] >= len_frag_mini :  # si l'espace entre les 2 est sup à 300 : 
-                                potentiel[dico_bornes[debut1][0]]= [debut2,dico_bornes[debut1][1],dico_bornes[debut1][2]]
+                            potentiel[dico_bornes[debut1][0]]= [debut2,dico_bornes[debut1][1],dico_bornes[debut1][2]]
                             del list_debut[0]
                     else : # s'il nous reste 1 dernier element faut regarder si ya un espace entre le dernier et la fin de la sequence totale
-                        if len(q_dict[blast_record.query.split()[0]]) - dico_bornes[debut1][0] >= len_frag_mini :
-                            potentiel[dico_bornes[debut1][0]]= [len(q_dict[blast_record.query.split()[0]]),dico_bornes[debut1][1],dico_bornes[debut1][2]]
+                        potentiel[dico_bornes[debut1][0]]= [len(q_dict[blast_record.query.split()[0]]),dico_bornes[debut1][1],dico_bornes[debut1][2]]
                         del list_debut[0]
                                 
                                 
@@ -193,7 +188,7 @@ def make_reference(output_tmp, nb_contigs, len_hit_mini, len_frag_mini, len_frag
                     file_exist=False
                     for key in potentiel :
                         to_add=str(q_dict[blast_record.query.split()[0]].seq)[key:potentiel[key][0]]
-                        if len(to_add) < len_frag_max :
+                        if len(to_add) < len_hit_mini :
                             print("taille du contig à ajouter :")
                             print(len(to_add))
                             who_add=potentiel[key][2] # sequence sur laquelle on va ajouter l'insertion
@@ -235,7 +230,7 @@ def make_reference(output_tmp, nb_contigs, len_hit_mini, len_frag_mini, len_frag
             subprocess.call("cat record_mauvais >> " + ref_in, shell=True)
        
             print("found %i records in query, %i have hits, making %i misses where %i have their length > %i" % (len(q_dict), len(hits), len(misses), len(orphan_length_ok), len_hit_mini))
-            print("found %i fragments where its contigs hits but not entirely where their length > %i, making %i more bp" % (nb_potentiel, len_frag_mini, nb_pb_potentiel))
+            print("found %i fragments where its contigs hits but not entirely where their length > %i, making %i more bp" % (nb_potentiel, nb_pb_potentiel))
             if potentiel_inser : #s'il y a potentiellement des insertions
                 gestion_fragment(ref_in,potentiel_inser)  
             keys.append(record.id)
@@ -283,4 +278,4 @@ if __name__ == "__main__":
         exit()
 
     make_contig_file(dict_name_seq , list_name , list_length , args.hit_min, args.output_tmp)
-    make_reference(args.output_tmp , args.nb_contigs, args.hit_min, args.frag_min,args.frag_max, args.identity, args.output_folder, args.name_ref, args.name_log)    
+    make_reference(args.output_tmp , args.nb_contigs, args.hit_min,args.identity, args.output_folder, args.name_ref, args.name_log)    
