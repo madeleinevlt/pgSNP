@@ -13,7 +13,7 @@ import multiprocessing
 import scripts.matrix_mldist_to_erable_input as me
 
 def get_argv() :
-    parser = argparse.ArgumentParser(description='Build a reference from contigs files')
+    parser = argparse.ArgumentParser(description='pgSNP pipeline v1.0')
     parser.add_argument("-contig", type=str, help='folder which contains your contigs or file which contains all path for contig location',required=True)
     parser.add_argument("-reads", type=str, help='folder which contains your reads',required=True)
     parser.add_argument("-o", metavar='output', type=str, help="folder which contains all outputs. Must be created",required=True)
@@ -64,8 +64,8 @@ if __name__ == "__main__":
 
     args.o=args.o+"/"
 
-    #mp.make_contig_file(dict_name_seq , list_name , list_length , args.hit_min, args.o + args.output_tmp)
-    #mp.make_reference(args.o + args.output_tmp , args.nb_contigs, args.hit_min,args.identity, args.o, args.name_ref + ".fasta", args.o + args.name_log)
+    mp.make_contig_file(dict_name_seq , list_name , list_length , args.hit_min, args.o + args.output_tmp)
+    mp.make_reference(args.o + args.output_tmp , args.nb_contigs, args.hit_min,args.identity, args.o, args.name_res + ".fasta", args.o + args.name_log)
 
 
     tmp_list=args.o + "tmp.fasta" + " " + args.o + "record_mauvais" + " " + args.o + "test_sortie.xml" + " " + args.o + "log_reference_all_data.log.log" + " " + args.o + "result.log" + args.o + args.output_tmp
@@ -90,7 +90,7 @@ if __name__ == "__main__":
             R1=ids_sorted[0]
             R2=ids_sorted[1]
             name_folder=R1.split("_R1")[0]+args.name_snip_folder
-            #subprocess.call("bin/snippy/bin/snippy --cpus "+ str(args.cpus) + " --outdir "+ args.o + "/" + name_folder + " --ref " + args.name_ref + ".fasta --R1 " + args.reads + R1 + " --R2 " +  args.reads + R2, shell=True)
+            subprocess.call("bin/snippy/bin/snippy --cpus "+ str(args.cpus) + " --outdir "+ args.o + "/" + name_folder + " --ref " + args.o + args.name_res + ".fasta --R1 " + args.reads + R1 + " --R2 " +  args.reads + R2, shell=True)
             del ids_sorted[0]
             del ids_sorted[0]
 ##Alignment marker
@@ -101,17 +101,17 @@ if __name__ == "__main__":
     for genome_file in glob.glob(args.o + "*/snps.aligned.fa"):
         all_genome[genome_file.split("/")[-2].split(args.name_snip_folder)[0]]=va.read_genome(genome_file)
     va.constru_seq_only_SNP(all_genome, args.o + args.output_alignment_name)
-    #dico=mc.read_genome(args.o + args.output_alignment_name)
+    dico=mc.read_genome(args.o + args.output_alignment_name)
 
-    #mc.write_genome(dico,args.o)
-    #mc.veref_aligment(glob.glob(args.o+"*_aligned.fasta"))
+    mc.write_genome(dico,args.o)
+    mc.veref_aligment(glob.glob(args.o+"*_aligned.fasta"))
     if not args.tmp :
         subprocess.call("rm -rf "+ args.o + "*" + args.name_snip_folder, shell="True")
 
 ## trees
 
-    #for file in glob.glob(args.o+"*_aligned.fasta") :
-        #subprocess.call("iqtree -s " + file +" -m " + args.model + " -bb 1000 -nt " + str(args.cpus),shell=True)
+    for file in glob.glob(args.o+"*_aligned.fasta") :
+        subprocess.call("iqtree -s " + file +" -m " + args.model + " -bb 1000 -nt " + str(args.cpus),shell=True)
     subprocess.call("cat " + args.o + "*.treefile > " + args.o + "all_iqtree_files && bin/FastRFS-linux/FastRFS -i " + args.o + "all_iqtree_files -o " + args.o + "file_fastRFS",shell=True)
 
     if not args.tmp :
@@ -127,7 +127,7 @@ if __name__ == "__main__":
     print(len(lengths))
     me.get_all_matrix_with_alignement_length(files, lengths, args.o + args.name_res)
 
-    subprocess.call("bin/erable -i " + args.o + args.name_res + " -t fastRFS_clean", shell=True)
+    subprocess.call("bin/erable -i " + args.o + args.name_res + " -t " + args.o +"fastRFS_clean", shell=True)
     subprocess.call("sed -e 's,:-[0-9\.]\+,:0.0,g' " + args.o + args.name_res + ".lengths.nwk > " + args.o + args.name_res + ".tree",shell=True) #Suppr longueur de branche négative
 
     if not args.tmp :
