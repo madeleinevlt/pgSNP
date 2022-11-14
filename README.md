@@ -22,10 +22,15 @@ BLASTN
 
 Using a new conda, I was able to easily install the programs used by the pipeline with :
 `conda install -c bioconda blast`
+
 `conda install -c bioconda iqtree`
+
 `conda install -c bioconda r-phytools`
+
 `conda install -c conda-forge biopython`
+
 `conda install -c bioconda snippy`
+
 `conda update samtools`
 
 The conda Snippy version is 3.1, while the last version on Github is 4.6. The 3.1 have some trouble at the alignment step, so I added a copy of the Snippy directory in the bin section.
