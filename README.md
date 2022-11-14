@@ -10,7 +10,7 @@ First, we generate multiple trees, one for each segment of continuous homogeneou
 
 ![alt text](pipeline.png "pgSNP pipeline")
 
-##Installation
+## Installation
 ---
 A netflow and maybe a conda version will be uploaded.
 This pipeline require :
@@ -35,7 +35,7 @@ The conda Snippy version is 3.1, while the last version on Github is 4.6. The 3.
 
 This version is not completelly parallelized, only IQ-TREE and Snippy are able to fully use your CPUs. Please check the number of CPUs before running (or it can caused some crash with IQ-TREE).
 
-##Option
+## Options
 
 Many options are available on this pipeline, described in the `python3 pgSNP.py -h`. Some of them are not really usefull (as the name of tempory files for examples).
 The main options :
