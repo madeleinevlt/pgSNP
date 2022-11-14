@@ -1,5 +1,5 @@
 # pgSNP : Pangenome SNP pipeline
----
+
 This pipeline was developped to infer a pangenomic SNP phylogenomic tree from paired-end reads and contigs.
 
 ## Description
@@ -11,7 +11,7 @@ First, we generate multiple trees, one for each segment of continuous homogeneou
 ![alt text](pipeline.png "pgSNP pipeline")
 
 ## Installation
----
+
 A netflow and maybe a conda version will be uploaded.
 This pipeline require :
 python3 with Biopython
@@ -35,7 +35,7 @@ Using a new conda, I was able to easily install the programs used by the pipelin
 
 The conda Snippy version is 3.1, while the last version on Github is 4.6. The 3.1 have some trouble at the alignment step, so I added a copy of the Snippy directory in the bin section.
 ## How to run
----
+
 `python3 pgSNP.py -contig data/contigs/ -o ./ -reads data/reads/ -cpus 12`
 
 This version is not completelly parallelized, only IQ-TREE and Snippy are able to fully use your CPUs. Please check the number of CPUs before running (or it can caused some crash with IQ-TREE).
