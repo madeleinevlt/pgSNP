@@ -90,7 +90,7 @@ if __name__ == "__main__":
             R1=ids_sorted[0]
             R2=ids_sorted[1]
             name_folder=R1.split("_R1")[0]+args.name_snip_folder
-            subprocess.call("bin/snippy/bin/snippy --cpus "+ str(args.cpus) + " --outdir "+ args.o + "/" + name_folder + " --ref " + args.o + args.name_res + ".fasta --R1 " + args.reads + R1 + " --R2 " +  args.reads + R2, shell=True)
+            subprocess.call("snippy --cpus "+ str(args.cpus) + " --outdir "+ args.o + "/" + name_folder + " --ref " + args.o + args.name_res + ".fasta --R1 " + args.reads + R1 + " --R2 " +  args.reads + R2, shell=True)
             del ids_sorted[0]
             del ids_sorted[0]
 ##Alignment marker
